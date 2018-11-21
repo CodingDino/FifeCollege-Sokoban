@@ -1,6 +1,7 @@
 // Project Includes
 #include "Level.h"
 #include "Framework/AssetManager.h"
+#include "Wall.h"
 
 // Library Includes
 #include <iostream>
@@ -10,6 +11,7 @@ Level::Level()
 	: m_cellSize(64.0f)
 	, m_currentLevel(0)
 	, m_background()
+	, m_contents()
 {
 	LoadLevel(1);
 }
@@ -34,6 +36,20 @@ void Level::Draw(sf::RenderTarget& _target)
 		}
 	}
 
+	// rows
+	for (int y = 0; y < m_contents.size(); ++y)
+	{
+		// cells
+		for (int x = 0; x < m_contents[y].size(); ++x)
+		{
+			// sticky outies (grid objects)
+			for (int z = 0; z < m_contents[y][x].size(); ++z)
+			{
+				m_contents[y][x][z]->Draw(_target);
+			}
+		}
+	}
+
 	// Reset view
 	_target.setView(_target.getDefaultView());
 }
@@ -50,10 +66,23 @@ void Level::LoadLevel(int _levelToLoad)
 	// Clean up the old level
 
 	// Delete any data already in the level
-	// TODO
+	// rows
+	for (int y = 0; y < m_contents.size(); ++y)
+	{
+		// cells
+		for (int x = 0; x < m_contents[y].size(); ++x)
+		{
+			// sticky outies (grid objects)
+			for (int z = 0; z < m_contents[y][x].size(); ++z)
+			{
+				delete m_contents[y][x][z];
+			}
+		}
+	}
 
 	// Clear out our lists
 	m_background.clear();
+	m_contents.clear();
 
 
 	// Set the current level
@@ -79,6 +108,7 @@ void Level::LoadLevel(int _levelToLoad)
 
 	// Create the first row in our grid
 	m_background.push_back(std::vector<sf::Sprite>());
+	m_contents.push_back(std::vector<std::vector<GridObject*> >());
 	   
 	// Read each character one by one from the file...
 	char ch;
@@ -101,6 +131,7 @@ void Level::LoadLevel(int _levelToLoad)
 
 			// Create a new row in our grid
 			m_background.push_back(std::vector<sf::Sprite>());
+			m_contents.push_back(std::vector<std::vector<GridObject*> >());
 		}
 		else
 		{
@@ -109,9 +140,19 @@ void Level::LoadLevel(int _levelToLoad)
 			m_background[y].push_back(sf::Sprite(AssetManager::GetTexture("graphics/ground.png")));
 			m_background[y][x].setPosition(x*m_cellSize, y*m_cellSize);
 
+			// Create an empty vector for our grid contents in this cell
+			m_contents[y].push_back(std::vector<GridObject*>());
+
 			if (ch == '-')
 			{
 				// Do nothing - empty space
+			}
+			else if (ch == 'W')
+			{
+				Wall* wall = new Wall();
+				wall->SetLevel(this);
+				wall->SetGridPosition(x, y);
+				m_contents[y][x].push_back(wall);
 			}
 			else
 			{
@@ -133,4 +174,9 @@ void Level::ReloadLevel()
 void Level::LoadNextLevel()
 {
 	LoadLevel(m_currentLevel + 1);
+}
+
+float Level::GetCellSize()
+{
+	return m_cellSize;
 }
