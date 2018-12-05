@@ -7,9 +7,11 @@ Player::Player()
 	: GridObject()
 	, m_pendingMove(0,0)
 	, m_moveSound()
+	, m_bumpSound()
 {
 	m_sprite.setTexture(AssetManager::GetTexture("graphics/player/playerStandDown.png"));
 	m_moveSound.setBuffer(AssetManager::GetSoundBuffer("audio/footstep1.ogg"));
+	m_bumpSound.setBuffer(AssetManager::GetSoundBuffer("audio/bump.wav"));
 }
 
 void Player::Input(sf::Event _gameEvent)
@@ -66,6 +68,10 @@ void Player::Update(sf::Time _frameTime)
 		if (moveSuccessful == true)
 		{
 			m_moveSound.play();
+		}
+		else
+		{
+			m_bumpSound.play();
 		}
 
 		// and clear the pending movement

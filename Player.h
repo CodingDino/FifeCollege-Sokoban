@@ -29,4 +29,5 @@ private:
 
 	sf::Vector2i m_pendingMove;
 	sf::Sound m_moveSound;
+	sf::Sound m_bumpSound;
 };
