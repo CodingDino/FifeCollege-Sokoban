@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Framework/AssetManager.h"
 #include "Level.h"
+#include "Box.h"
 
 Player::Player()
 	: GridObject()
@@ -88,24 +89,49 @@ bool Player::AttemptMove(sf::Vector2i _direction)
 	// Calculate target position
 	sf::Vector2i targetPos = m_gridPosition + _direction;
 
-	// TODO: Check if the space is empty
+	// Check if the space is empty
 
 	// Get list of objects in our target position
 	std::vector<GridObject*> targetCellContents = m_level->GetObjectAt(targetPos);
 
 	// Check if any of those objects block movement
 	bool blocked = false;
+	GridObject* blocker = nullptr;
 	for (int i = 0; i < targetCellContents.size(); ++i)
 	{
 		if (targetCellContents[i]->GetBlocksMovement() == true)
 		{
 			blocked = true;
+			blocker = targetCellContents[i];
 		}
 	}
 
 	// If empty, move there
 	if (blocked == false)
+	{
 		return m_level->MoveObjectTo(this, targetPos);
+	}
+	else
+	{
+		// We were blocked!
+		// Can we push the thing blocking us?
+		// Do a dynamic cast to a box to see if we can push it
+		Box* pushableBox = dynamic_cast<Box*>(blocker);
+
+		// If so (the blocker is a box (not nullptr))
+		if (pushableBox != nullptr)
+		{
+			// Attempt to push!
+			bool pushSucceeded = pushableBox->AttemptPush(_direction);
+
+			// If push succeeded
+			if (pushSucceeded == true)
+			{
+				// Move to new spot (where blocker was)
+				return m_level->MoveObjectTo(this, targetPos);
+			}
+		}
+	}
 
 	// If movement is blocked, do nothing, return false
 	// Default
