@@ -67,12 +67,14 @@ bool Box::AttemptPush(sf::Vector2i _direction)
 				if (storageObject != nullptr)
 				{
 					// The object IS a storage object!
-
 					// We are stored!
 					m_stored = true;
 
 					// Play sound
 					m_storeSound.play();
+
+					// Check if the level is complete!
+					m_level->CheckComplete();
 				}
 			}
 
@@ -87,11 +89,16 @@ bool Box::AttemptPush(sf::Vector2i _direction)
 			}
 		}
 
-
 		return moveSucceeded;
 	}
 
 	// If movement is blocked, do nothing, return false
 	// Default
 	return false;
+}
+
+
+bool Box::GetStored()
+{
+	return m_stored;
 }
