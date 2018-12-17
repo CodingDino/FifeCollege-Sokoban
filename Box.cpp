@@ -8,10 +8,12 @@ Box::Box()
 	: GridObject()
 	, m_stored(false)
 	, m_pushSound()
+	, m_storeSound()
 {
 	m_sprite.setTexture(AssetManager::GetTexture("graphics/box.png"));
 	m_blocksMovement = true;
 	m_pushSound.setBuffer(AssetManager::GetSoundBuffer("audio/push.wav"));
+	m_storeSound.setBuffer(AssetManager::GetSoundBuffer("audio/stored.wav"));
 
 }
 
@@ -68,6 +70,9 @@ bool Box::AttemptPush(sf::Vector2i _direction)
 
 					// We are stored!
 					m_stored = true;
+
+					// Play sound
+					m_storeSound.play();
 				}
 			}
 
