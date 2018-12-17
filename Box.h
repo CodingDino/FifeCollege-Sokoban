@@ -17,5 +17,6 @@ public:
 
 private:
 
+	bool m_stored;
 	sf::Sound m_pushSound;
 };

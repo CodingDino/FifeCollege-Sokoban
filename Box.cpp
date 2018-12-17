@@ -2,9 +2,11 @@
 #include "Box.h"
 #include "Framework/AssetManager.h"
 #include "Level.h"
+#include "Storage.h"
 
 Box::Box()
 	: GridObject()
+	, m_stored(false)
 	, m_pushSound()
 {
 	m_sprite.setTexture(AssetManager::GetTexture("graphics/box.png"));
@@ -41,7 +43,47 @@ bool Box::AttemptPush(sf::Vector2i _direction)
 	if (blocked == false)
 	{
 		m_pushSound.play();
-		return m_level->MoveObjectTo(this, targetPos);
+		bool moveSucceeded = m_level->MoveObjectTo(this, targetPos);
+
+		// If we DID successfully move...
+		if (moveSucceeded == true)
+		{
+			// Check if we are stored!
+
+			// Assume we are not stored to start
+			m_stored = false;
+
+			// Loop through the contents and see if a storage object was found
+			for (int i = 0; i < targetCellContents.size(); ++i)
+			{
+				// Check if this element in the vector is a Storage object
+				// By doing a dynamic cast
+				Storage* storageObject = dynamic_cast<Storage*>(targetCellContents[i]);
+
+				// If dynamic cast succeeds, it will be NOT a nullptr
+				// aka, the object IS a storage object
+				if (storageObject != nullptr)
+				{
+					// The object IS a storage object!
+
+					// We are stored!
+					m_stored = true;
+				}
+			}
+
+			// And change our sprite accordingly
+			if (m_stored)
+			{
+				m_sprite.setTexture(AssetManager::GetTexture("graphics/boxStored.png"));
+			}
+			else
+			{
+				m_sprite.setTexture(AssetManager::GetTexture("graphics/box.png"));
+			}
+		}
+
+
+		return moveSucceeded;
 	}
 
 	// If movement is blocked, do nothing, return false
